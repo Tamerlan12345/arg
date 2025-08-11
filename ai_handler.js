@@ -9,10 +9,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initial render in case of pre-filled history
     renderChatHistory();
 });
-
+ feat/redesign-ai-assistant
 function renderChatHistory() {
     const chatHistoryDiv = document.getElementById('chat-history');
     if (!chatHistoryDiv) return;
+
+async function handleAiGeneration() {
+    const apiKey = 'AIzaSyAkPS45eQkdmKrJkb-ExGOUDdxMzKhSGAY'; // User-provided API Key
+    const promptInput = document.getElementById('ai-prompt-new');
+    const resultDiv = document.getElementById('ai-result-new');
+    const generateBtn = document.getElementById('ai-generate-btn-new');
+main
 
     chatHistoryDiv.innerHTML = ''; // Clear existing messages
     conversationHistory.forEach(message => {
