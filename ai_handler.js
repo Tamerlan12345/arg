@@ -4,27 +4,23 @@ const apiKey = 'AIzaSyAKTRThK4t2AVsrTiwJjnEEY-bdK6UHJho'; // User-provided API K
 document.addEventListener('DOMContentLoaded', () => {
     const chatForm = document.getElementById('chat-form');
     if (chatForm) {
+        // Add welcome message to history on load
+        conversationHistory.push({ role: 'assistant', text: 'Здравствуйте! Я ваш юридический ИИ-консультант. Опишите, какие изменения вы хотите внести в договор, и мы вместе подготовим документ.' });
         chatForm.addEventListener('submit', handleChatSubmit);
     }
-    // Initial render in case of pre-filled history
     renderChatHistory();
 });
- feat/redesign-ai-assistant
+
 function renderChatHistory() {
     const chatHistoryDiv = document.getElementById('chat-history');
     if (!chatHistoryDiv) return;
 
-async function handleAiGeneration() {
-    const apiKey = 'AIzaSyAkPS45eQkdmKrJkb-ExGOUDdxMzKhSGAY'; // User-provided API Key
-    const promptInput = document.getElementById('ai-prompt-new');
-    const resultDiv = document.getElementById('ai-result-new');
-    const generateBtn = document.getElementById('ai-generate-btn-new');
-main
+    // Clear placeholder or existing messages
+    chatHistoryDiv.innerHTML = '';
 
-    chatHistoryDiv.innerHTML = ''; // Clear existing messages
     conversationHistory.forEach(message => {
         const messageDiv = document.createElement('div');
-        messageDiv.className = `chat-message ${message.role}`; // 'user' or 'assistant'
+        messageDiv.className = `chat-message ${message.role}`;
 
         const bubbleDiv = document.createElement('div');
         bubbleDiv.className = 'chat-bubble';
@@ -41,8 +37,10 @@ main
 async function handleChatSubmit(event) {
     event.preventDefault();
     const chatInput = document.getElementById('chat-input');
-    const userInput = chatInput.value.trim();
+    const sendBtn = document.getElementById('send-chat-btn');
+    const finalDocOutput = document.getElementById('final-document-output');
 
+    const userInput = chatInput.value.trim();
     if (!userInput) return;
 
     // Add user message to history and render
@@ -51,11 +49,8 @@ async function handleChatSubmit(event) {
 
     // Clear input and disable form
     chatInput.value = '';
-    const sendBtn = document.getElementById('send-chat-btn');
     sendBtn.disabled = true;
     sendBtn.textContent = '...';
-
-    const finalDocOutput = document.getElementById('final-document-output');
 
     // Add a temporary "typing" indicator for the assistant
     conversationHistory.push({ role: 'assistant', text: '...' });
@@ -76,12 +71,12 @@ async function handleChatSubmit(event) {
 ---
 
 **ШАГ 1: Анализ и начало диалога.**
-* Внимательно изучи данные в блоке \`[ДАННЫЕ ДЛЯ ЗАПОЛНЕНИЯ]\`.
+* Внимательно изучи данные в блоке \\\`[ДАННЫЕ ДЛЯ ЗАПОЛНЕНИЯ]\\\`.
 * Твой ПЕРВЫЙ ответ ДОЛЖЕН БЫТЬ началом диалога. НЕ генерируй документ сразу.
 * Начни с приветствия и подтверди, что ты проанализировал запрос. Пример: «Здравствуйте! Я изучил ваш запрос на внесение изменений в договор с АО «СК «Сентрас Иншуранс». Прежде чем мы подготовим финальный документ, давайте обсудим несколько деталей.»
 
 **ШАГ 2: Обсуждение и консультирование.**
-* Задай уточняющие вопросы по каждому пункту из \`СПИСКА ИЗМЕНЕНИЙ\`.
+* Задай уточняющие вопросы по каждому пункту из \\\`СПИСКА ИЗМЕНЕНИЙ\\\`.
 * Если видишь потенциальные проблемы (например, изменение адреса без уточнения, является ли он юридическим или фактическим), вежливо укажи на это.
 * Если формулировка может быть лучше с юридической точки зрения, предложи свой вариант.
 
@@ -89,7 +84,7 @@ async function handleChatSubmit(event) {
 * После обсуждения всех деталей, закончи свой ответ фразой, призывающей к подтверждению. Пример: «Если все детали теперь верны, дайте мне знать, и я подготовлю итоговый документ».
 
 **ШАГ 4: Генерация документа.**
-* Получив от меня подтверждение, создай полный текст Дополнительного соглашения, используя \`[ШАБЛОН ДОКУМЕНТА]\` и финально согласованные данные.
+* Получив от меня подтверждение, создай полный текст Дополнительного соглашения, используя \\\`[ШАБЛОН ДОКУМЕНТА]\\\` и финально согласованные данные.
 * Строго следуй правилам: точное соответствие шаблону и форматирование чисел (цифрами и прописью).
 
 ---
@@ -126,7 +121,8 @@ async function handleChatSubmit(event) {
 **СТРАХОВАТЕЛЬ:** _______________
 `;
 
-        const historyForApi = conversationHistory.map(m => ({
+        // Use slice to exclude the initial welcome message from the API call history
+        const historyForApi = conversationHistory.slice(1).map(m => ({
             role: m.role === 'assistant' ? 'model' : 'user',
             parts: [{ text: m.text }]
         }));
