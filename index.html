@@ -69,29 +69,32 @@
     <div id="new-design" class="tab-content">
         <div class="k-container">
             <header class="k-header">
-                <h1>Ваш умный ассистент по договорам</h1>
-                <p>Опишите задачу простыми словами, и ИИ составит полный текст дополнительного соглашения, готовый к печати.</p>
+                <h1>Чат с ИИ-консультантом</h1>
+                <p>Начните диалог, чтобы составить дополнительное соглашение. ИИ задаст уточняющие вопросы.</p>
             </header>
             <main class="k-main">
-                <div class="k-card">
-                    <div class="k-card-header">
-                        <h2>Генерация дополнительного соглашения</h2>
-                    </div>
-                    <div class="k-card-body">
-                        <div class="k-form-group">
-                            <label for="ai-prompt-new">1. Опишите, какие изменения нужно внести</label>
-                            <textarea id="ai-prompt-new" class="k-textarea" placeholder="Например: 'Договор №123 от 01.01.24. Увеличить страховую сумму на 50 000 до 1 050 000 тенге и премию на 2 000 до 22 000 тенге. Основание - письмо клиента.'"></textarea>
+                <div class="k-card chat-card">
+                    <div class="k-card-body" id="chat-history">
+                        <!-- Chat messages will be dynamically inserted here -->
+                        <div class="chat-message assistant">
+                            <div class="chat-bubble">Здравствуйте! Я ваш юридический ИИ-консультант. Опишите, какие изменения вы хотите внести в договор, и мы вместе подготовим документ.</div>
                         </div>
-                        <button id="ai-generate-btn-new" class="k-button">Создать документ</button>
+                    </div>
+                    <div class="k-card-footer">
+                        <form id="chat-form" class="chat-input-form">
+                            <textarea id="chat-input" class="k-textarea" placeholder="Введите ваш запрос..." rows="2"></textarea>
+                            <button type="submit" class="k-button" id="send-chat-btn">Отправить</button>
+                        </form>
                     </div>
                 </div>
+
                 <div class="k-card k-result-card">
                      <div class="k-card-header">
-                        <h2>2. Готовый документ</h2>
+                        <h2>Итоговый документ</h2>
                     </div>
                     <div class="k-card-body">
-                        <div id="ai-result-new" class="k-result-area">
-                            <p class="k-placeholder">Здесь появится полный текст вашего документа...</p>
+                        <div id="final-document-output" class="k-result-area">
+                            <p class="k-placeholder">Здесь появится финальный текст документа после вашего подтверждения в чате...</p>
                         </div>
                     </div>
                 </div>
