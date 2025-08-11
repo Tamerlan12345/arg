@@ -1,0 +1,94 @@
+/* Corporate Design Styles */
+body.new-design-body {
+    background-color: #f4f7fc;
+    color: #333;
+    font-family: 'Roboto', sans-serif;
+}
+
+.new-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.new-header h1 {
+    font-family: 'Roboto', sans-serif;
+    font-size: 2.5rem;
+    color: #1a3a6e;
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.ai-assistant-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    background-color: #fff;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.ai-input-column, .ai-output-column {
+    display: flex;
+    flex-direction: column;
+}
+
+.new-form-group {
+    margin-bottom: 25px;
+}
+
+.new-form-group label {
+    display: block;
+    font-weight: bold;
+    color: #555;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.new-textarea {
+    width: 100%;
+    min-height: 300px;
+    padding: 15px;
+    border: 1px solid #dcdcdc;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-family: 'Roboto', sans-serif;
+    resize: vertical;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.new-textarea:focus {
+    outline: none;
+    border-color: #4a90e2;
+    box-shadow: 0 0 5px rgba(74, 144, 226, 0.5);
+}
+
+.new-button {
+    background-color: #4a90e2;
+    color: white;
+    font-family: 'Roboto', sans-serif;
+    font-size: 1.1rem;
+    font-weight: bold;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    align-self: center;
+    transition: background-color 0.3s;
+}
+
+.new-button:hover {
+    background-color: #357abd;
+}
+
+#ai-result-text {
+    background-color: #f9f9f9;
+    border: 1px solid #dcdcdc;
+    white-space: pre-wrap;
+    flex-grow: 1;
+}
