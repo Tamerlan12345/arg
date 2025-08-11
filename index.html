@@ -67,25 +67,35 @@
     </div>
 
     <div id="new-design" class="tab-content">
-        <div class="new-container">
-            <div class="new-header">
-                <h1>AI-Powered Agreement Assistant</h1>
-            </div>
-            <div class="ai-assistant-container">
-                <div class="ai-input-column">
-                    <div class="new-form-group">
-                        <label for="ai-prompt">Ваш запрос к ИИ</label>
-                        <textarea id="ai-prompt" class="new-textarea" placeholder="Например: 'Нужно добавить в договор №123 от 01.01.2024 доплату страховой премии в размере 5000 тенге со сроком до 15.07.2024 на основании письма клиента.'"></textarea>
+        <div class="k-container">
+            <header class="k-header">
+                <h1>Ваш умный ассистент по договорам</h1>
+                <p>Опишите задачу простыми словами, и ИИ составит полный текст дополнительного соглашения, готовый к печати.</p>
+            </header>
+            <main class="k-main">
+                <div class="k-card">
+                    <div class="k-card-header">
+                        <h2>Генерация дополнительного соглашения</h2>
                     </div>
-                    <button class="new-button" id="ai-generate-btn">Сгенерировать с помощью ИИ</button>
-                </div>
-                <div class="ai-output-column">
-                    <div class="new-form-group" style="flex-grow: 1; display: flex; flex-direction: column;">
-                        <label for="ai-result-text">Результат от ИИ</label>
-                        <textarea id="ai-result-text" class="new-textarea" readonly placeholder="Здесь появится результат обработки ИИ..."></textarea>
+                    <div class="k-card-body">
+                        <div class="k-form-group">
+                            <label for="ai-prompt-new">1. Опишите, какие изменения нужно внести</label>
+                            <textarea id="ai-prompt-new" class="k-textarea" placeholder="Например: 'Договор №123 от 01.01.24. Увеличить страховую сумму на 50 000 до 1 050 000 тенге и премию на 2 000 до 22 000 тенге. Основание - письмо клиента.'"></textarea>
+                        </div>
+                        <button id="ai-generate-btn-new" class="k-button">Создать документ</button>
                     </div>
                 </div>
-            </div>
+                <div class="k-card k-result-card">
+                     <div class="k-card-header">
+                        <h2>2. Готовый документ</h2>
+                    </div>
+                    <div class="k-card-body">
+                        <div id="ai-result-new" class="k-result-area">
+                            <p class="k-placeholder">Здесь появится полный текст вашего документа...</p>
+                        </div>
+                    </div>
+                </div>
+            </main>
         </div>
     </div>
 
