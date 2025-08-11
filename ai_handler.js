@@ -2,11 +2,20 @@ let conversationHistory = [];
 const apiKey = 'AIzaSyAKTRThK4t2AVsrTiwJjnEEY-bdK6UHJho'; // User-provided API Key
 
 document.addEventListener('DOMContentLoaded', () => {
-    const chatForm = document.getElementById('chat-form');
-    if (chatForm) {
+    const sendBtn = document.getElementById('send-chat-btn');
+    const chatInput = document.getElementById('chat-input');
+
+    if (sendBtn && chatInput) {
         // Add welcome message to history on load
         conversationHistory.push({ role: 'assistant', text: 'Здравствуйте! Я ваш юридический ИИ-консультант. Опишите, какие изменения вы хотите внести в договор, и мы вместе подготовим документ.' });
-        chatForm.addEventListener('submit', handleChatSubmit);
+
+        sendBtn.addEventListener('click', handleSendMessage);
+        chatInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault(); // Prevent new line
+                handleSendMessage();
+            }
+        });
     }
     renderChatHistory();
 });
@@ -34,8 +43,7 @@ function renderChatHistory() {
     chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight;
 }
 
-async function handleChatSubmit(event) {
-    event.preventDefault();
+async function handleSendMessage() {
     const chatInput = document.getElementById('chat-input');
     const sendBtn = document.getElementById('send-chat-btn');
     const finalDocOutput = document.getElementById('final-document-output');
