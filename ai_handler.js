@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function handleAiGeneration() {
-    const apiKey = 'AIzaSyAKTRThK4t2AVsrTiwJjnEEY-bdK6UHJho'; // User-provided API Key
+    const apiKey = 'AIzaSyAkPS45eQkdmKrJkb-ExGOUDdxMzKhSGAY'; // User-provided API Key
     const promptInput = document.getElementById('ai-prompt-new');
     const resultDiv = document.getElementById('ai-result-new');
     const generateBtn = document.getElementById('ai-generate-btn-new');
