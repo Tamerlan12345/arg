@@ -1,105 +1,184 @@
+let conversationHistory = [];
+const apiKey = 'AIzaSyAKTRThK4t2AVsrTiwJjnEEY-bdK6UHJho'; // User-provided API Key
+
 document.addEventListener('DOMContentLoaded', () => {
-    const aiGenerateBtn = document.getElementById('ai-generate-btn-new');
-    if (aiGenerateBtn) {
-        aiGenerateBtn.addEventListener('click', handleAiGeneration);
+    const chatForm = document.getElementById('chat-form');
+    if (chatForm) {
+        chatForm.addEventListener('submit', handleChatSubmit);
     }
+    // Initial render in case of pre-filled history
+    renderChatHistory();
 });
+ feat/redesign-ai-assistant
+function renderChatHistory() {
+    const chatHistoryDiv = document.getElementById('chat-history');
+    if (!chatHistoryDiv) return;
 
 async function handleAiGeneration() {
     const apiKey = 'AIzaSyAkPS45eQkdmKrJkb-ExGOUDdxMzKhSGAY'; // User-provided API Key
     const promptInput = document.getElementById('ai-prompt-new');
     const resultDiv = document.getElementById('ai-result-new');
     const generateBtn = document.getElementById('ai-generate-btn-new');
+main
 
-    const userPrompt = promptInput.value;
-    if (!userPrompt.trim()) {
-        alert('Пожалуйста, введите ваш запрос в текстовое поле.');
-        return;
-    }
+    chatHistoryDiv.innerHTML = ''; // Clear existing messages
+    conversationHistory.forEach(message => {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `chat-message ${message.role}`; // 'user' or 'assistant'
 
-    // Disable button and show loading state
-    generateBtn.disabled = true;
-    generateBtn.textContent = 'Создание документа...';
-    resultDiv.innerHTML = '<p class="k-placeholder">Пожалуйста, подождите, ИИ обрабатывает ваш запрос...</p>';
+        const bubbleDiv = document.createElement('div');
+        bubbleDiv.className = 'chat-bubble';
+        bubbleDiv.textContent = message.text;
 
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+        messageDiv.appendChild(bubbleDiv);
+        chatHistoryDiv.appendChild(messageDiv);
+    });
 
-    const systemPrompt = `
-Ты — высококвалифицированный ИИ-ассистент, специализирующийся на составлении юридических документов в Казахстане. Твоя задача — сгенерировать полный, точный и юридически корректный текст Дополнительного соглашения к договору страхования на основе запроса пользователя.
+    // Auto-scroll to the latest message
+    chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight;
+}
 
-**ИНСТРУКЦИИ:**
-1.  **СТРОГОСТЬ И ФОРМАЛИЗМ:** Используй исключительно строгие, официальные и юридически выверенные формулировки. Не допускай разговорного стиля, упрощений или двусмысленности.
-2.  **ПОЛНОТА ДОКУМЕНТА:** Сгенерированный текст должен представлять собой полноценное дополнительное соглашение. Он должен включать:
-    *   **Преамбулу:** "Дополнительное соглашение №___" (оставь номер пустым), город (если не указан, используй "г. Алматы"), дата (если не указана, используй "«__» _______ 202__ г.").
-    *   **Стороны:** Укажи стандартные формулировки для Страховщика (АО "Страховая компания 'Сентрас Иншуранс'") и Страхователя (если имя не указано в запросе, оставь плейсхолдер "___________________").
-    *   **Предмет соглашения:** Четко укажи, что стороны вносят изменения в конкретный Договор страхования (используй номер и дату из запроса пользователя).
-    *   **Пункты изменений:** Детально и точно изложи суть изменений, запрошенных пользователем. Каждый пункт должен быть пронумерован.
-    *   **Заключительные положения:** Включи стандартные пункты о том, что соглашение вступает в силу с момента подписания, является неотъемлемой частью основного Договора, и составлено в двух экземплярах.
-3.  **БЕЗ ДОМЫСЛОВ:** НИКОГДА не придумывай информацию. Если в запросе пользователя не хватает данных (например, номер договора, ФИО, конкретные даты), используй плейсхолдеры (например, "№_______", "от «__» _______ ____ г.", "ФИО: ______________").
-4.  **ФОРМАТИРОВАНИЕ:** Используй четкое форматирование с нумерованными списками для пунктов и абзацами для разделения логических блоков.
+async function handleChatSubmit(event) {
+    event.preventDefault();
+    const chatInput = document.getElementById('chat-input');
+    const userInput = chatInput.value.trim();
 
-**ПРИМЕР СТРУКТУРЫ:**
+    if (!userInput) return;
 
-ДОПОЛНИТЕЛЬНОЕ СОГЛАШЕНИЕ № ____
-к Договору [Вид страхования] № [Номер из запроса] от [Дата из запроса]
+    // Add user message to history and render
+    conversationHistory.push({ role: 'user', text: userInput });
+    renderChatHistory();
 
-г. Алматы                                                               «__» _______ 202__ г.
+    // Clear input and disable form
+    chatInput.value = '';
+    const sendBtn = document.getElementById('send-chat-btn');
+    sendBtn.disabled = true;
+    sendBtn.textContent = '...';
 
-АО «Страховая компания «Сентрас Иншуранс», именуемое в дальнейшем «Страховщик», в лице [Должность и ФИО представителя], с одной стороны, и
-[ФИО/Наименование Страхователя], именуемый(ая) в дальнейшем «Страхователь», с другой стороны,
-заключили настоящее Дополнительное соглашение о нижеследующем:
+    const finalDocOutput = document.getElementById('final-document-output');
 
-1. Основанием для заключения настоящего Дополнительного соглашения является [Основание из запроса, например, 'письмо Страхователя'].
-2. Стороны договорились внести следующие изменения и дополнения в Договор:
-   2.1. [Пункт 1 из запроса пользователя в строгой юридической формулировке]
-   2.2. [Пункт 2 из запроса пользователя в строгой юридической формулировке]
-3. Настоящее Дополнительное соглашение вступает в силу с даты его подписания обеими Сторонами.
-4. Во всем остальном, что не предусмотрено настоящим Дополнительным соглашением, Стороны руководствуются условиями Договора.
-5. Настоящее Дополнительное соглашение составлено в двух экземплярах, имеющих одинаковую юридическую силу, по одному для каждой из Сторон.
-
----
-**ЗАПРОС ПОЛЬЗОВАТЕЛЯ:**
-${userPrompt}
-`;
-
-    const requestBody = {
-        contents: [{
-            parts: [{
-                text: systemPrompt
-            }]
-        }],
-        generationConfig: {
-            temperature: 0.4,
-            topK: 1,
-            topP: 1,
-            maxOutputTokens: 2048,
-        }
-    };
+    // Add a temporary "typing" indicator for the assistant
+    conversationHistory.push({ role: 'assistant', text: '...' });
+    renderChatHistory();
 
     try {
+        const systemPrompt = `
+[РОЛЬ]
+Ты — интерактивный юрист-консультант, специализирующийся на договорном праве. Твоя главная задача — не просто сгенерировать документ, а провести клиента (меня) через процесс согласования изменений в договоре. Ты должен быть внимательным, проактивным и педантичным.
+
+[КОНТЕКСТ]
+Клиент предоставляет тебе черновые данные для составления Дополнительного соглашения к договору со страховой компанией АО «СК «Сентрас Иншуранс». Твоя работа состоит из двух этапов:
+1.  **Обсуждение:** Сначала ты анализируешь предоставленные данные, задаешь уточняющие вопросы, указываешь на возможные несостыковки или риски, предлагаешь лучшие формулировки. Твоя цель на этом этапе — убедиться, что все детали верны и полностью согласованы.
+2.  **Генерация:** Только ПОСЛЕ того, как я дам явное подтверждение (например, «Все верно, готовь документ»), ты приступаешь к созданию финального текста Дополнительного соглашения по строгому шаблону.
+
+---
+### АЛГОРИТМ РАБОТЫ ИИ
+---
+
+**ШАГ 1: Анализ и начало диалога.**
+* Внимательно изучи данные в блоке \`[ДАННЫЕ ДЛЯ ЗАПОЛНЕНИЯ]\`.
+* Твой ПЕРВЫЙ ответ ДОЛЖЕН БЫТЬ началом диалога. НЕ генерируй документ сразу.
+* Начни с приветствия и подтверди, что ты проанализировал запрос. Пример: «Здравствуйте! Я изучил ваш запрос на внесение изменений в договор с АО «СК «Сентрас Иншуранс». Прежде чем мы подготовим финальный документ, давайте обсудим несколько деталей.»
+
+**ШАГ 2: Обсуждение и консультирование.**
+* Задай уточняющие вопросы по каждому пункту из \`СПИСКА ИЗМЕНЕНИЙ\`.
+* Если видишь потенциальные проблемы (например, изменение адреса без уточнения, является ли он юридическим или фактическим), вежливо укажи на это.
+* Если формулировка может быть лучше с юридической точки зрения, предложи свой вариант.
+
+**ШАГ 3: Ожидание подтверждения.**
+* После обсуждения всех деталей, закончи свой ответ фразой, призывающей к подтверждению. Пример: «Если все детали теперь верны, дайте мне знать, и я подготовлю итоговый документ».
+
+**ШАГ 4: Генерация документа.**
+* Получив от меня подтверждение, создай полный текст Дополнительного соглашения, используя \`[ШАБЛОН ДОКУМЕНТА]\` и финально согласованные данные.
+* Строго следуй правилам: точное соответствие шаблону и форматирование чисел (цифрами и прописью).
+
+---
+### ШАБЛОН ДОКУМЕНТА (НЕИЗМЕНЯЕМЫЙ)
+---
+
+**ДОПОЛНИТЕЛЬНОЕ СОГЛАШЕНИЕ № [Номер доп. соглашения]**
+к Договору добровольного страхования автомобильного транспорта № [Номер основного договора] от «[Дата основного договора]» г.
+
+г. [Город] | «__» _______ 20__ г.
+
+**АО «СК «Сентрас Иншуранс»**, именуемое в дальнейшем «Страховщик», в лице [Должность, ФИО представителя Страховщика], действующего на основании [Основание полномочий представителя], с одной стороны, и
+**[Наименование Страхователя]**, именуемое в дальнейшем «Страхователь», в лице [Должность, ФИО представителя Страхователя], действующего на основании [Основание полномочий представителя], с другой стороны,
+далее совместно именуемые «Стороны», заключили настоящее Дополнительное соглашение (далее – Соглашение) о нижеследующем:
+
+1. Основанием для заключения настоящего Дополнительного соглашения является [Основание для заключения] Вх.№ [Номер входящего письма] от «[Дата входящего письма]» г.
+
+2. Предметом настоящего Дополнительного соглашения является внесение изменений в Договор добровольного страхования автомобильного транспорта № [Номер основного договора] от «[Дата основного договора]» г. (далее – Договор).
+
+3. Стороны договорились внести изменения в Договор и изложить их в следующей редакции:
+[ЗДЕСЬ ДИНАМИЧЕСКИ СГЕНЕРИРОВАТЬ СПИСОК ИЗМЕНЕНИЙ ПОСЛЕ СОГЛАСОВАНИЯ]
+
+4. Настоящее Дополнительное соглашение вступает в силу с даты подписания Сторонами.
+
+5. Остальные пункты и условия Договора, не затронутые настоящим Дополнительным соглашением, остаются неизменными.
+
+6. Настоящее Дополнительное соглашение составлено в двух подлинных экземплярах, имеющих одинаковую юридическую силу, по одному для каждой из Сторон.
+
+**ПОДПИСИ СТОРОН:**
+
+**СТРАХОВЩИК:** _______________
+**АО «СК «Сентрас Иншуранс»**
+
+**СТРАХОВАТЕЛЬ:** _______________
+`;
+
+        const historyForApi = conversationHistory.map(m => ({
+            role: m.role === 'assistant' ? 'model' : 'user',
+            parts: [{ text: m.text }]
+        }));
+
+        const requestBody = {
+            contents: historyForApi,
+            systemInstruction: {
+                parts: [{ text: systemPrompt }]
+            },
+            generationConfig: {
+                temperature: 0.7,
+                topK: 1,
+                topP: 1,
+                maxOutputTokens: 4096,
+            }
+        };
+
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
         const response = await fetch(apiUrl, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestBody),
         });
 
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(`Ошибка API: ${response.status} ${response.statusText}. ${errorData.error.message}`);
+            throw new Error(`API Error: ${response.status} ${response.statusText}. ${errorData.error.message}`);
         }
 
         const data = await response.json();
-        const generatedText = data.candidates[0].content.parts[0].text;
-        resultDiv.textContent = generatedText.trim();
+        const aiText = data.candidates[0].content.parts[0].text;
+
+        // Remove the "typing" indicator
+        conversationHistory.pop();
+
+        // Check if the response is the final document
+        if (aiText.includes("ДОПОЛНИТЕЛЬНОЕ СОГЛАШЕНИЕ")) {
+             finalDocOutput.textContent = aiText.trim();
+             conversationHistory.push({ role: 'assistant', text: "Документ готов. Вы можете скопировать его из поля 'Итоговый документ' ниже." });
+        } else {
+            conversationHistory.push({ role: 'assistant', text: aiText.trim() });
+        }
 
     } catch (error) {
-        console.error('Ошибка при вызове Gemini API:', error);
-        resultDiv.innerHTML = `<p class="k-placeholder" style="color: #ff6b6b;">Произошла ошибка: ${error.message}<br><br>Пожалуйста, проверьте API-ключ и настройки сети.</p>`;
+        console.error('Error calling Gemini API:', error);
+        // Remove the "typing" indicator
+        conversationHistory.pop();
+        conversationHistory.push({ role: 'assistant', text: `Произошла ошибка: ${error.message}` });
     } finally {
-        // Re-enable button
-        generateBtn.disabled = false;
-        generateBtn.textContent = 'Создать документ';
+        renderChatHistory();
+        sendBtn.disabled = false;
+        sendBtn.textContent = 'Отправить';
+        chatInput.focus();
     }
 }
