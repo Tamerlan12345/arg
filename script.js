@@ -97,7 +97,11 @@ function openTab(evt, tabName) {
 
 // --- ЛОГИКА ИИ-АССИСТЕНТА (НОВЫЙ ДИЗАЙН) ---
 let conversationHistory = [];
-const apiKey = 'AIzaSyAKTRThK4t2AVsrTiwJjnEEY-bdK6UHJho';
+// ВАЖНО: Ключ API не должен храниться в коде на стороне клиента.
+// Это серьезная уязвимость, которая позволяет любому украсть ваш ключ.
+// Замените эту строку и загружайте ключ из безопасного источника,
+// например, через серверный прокси или переменные окружения.
+const apiKey = 'YOUR_API_KEY_HERE';
 
 function renderChatHistory() {
     const chatHistoryDiv = document.getElementById('chat-history');
@@ -250,7 +254,7 @@ async function handleSendMessage() {
     } catch (error) {
         console.error('Error calling Gemini API:', error);
         conversationHistory.pop();
-        conversationHistory.push({ role: 'assistant', text: `Произошла ошибка: ${error.message}` });
+        conversationHistory.push({ role: 'assistant', text: 'К сожалению, произошла ошибка при обращении к ИИ-ассистенту. Пожалуйста, проверьте свой ключ API и попробуйте снова позже.' });
     } finally {
         renderChatHistory();
         sendBtn.disabled = false;
