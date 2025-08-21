@@ -226,7 +226,7 @@ async function handleSendMessage() {
             systemInstruction: { parts: [{ text: systemPrompt }] },
             generationConfig: { temperature: 0.7, topK: 1, topP: 1, maxOutputTokens: 4096 }
         };
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
         const response = await fetch(apiUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
