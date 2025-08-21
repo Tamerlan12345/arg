@@ -101,7 +101,7 @@ let conversationHistory = [];
 // Это серьезная уязвимость, которая позволяет любому украсть ваш ключ.
 // Замените эту строку и загружайте ключ из безопасного источника,
 // например, через серверный прокси или переменные окружения.
-const apiKey = 'YOUR_API_KEY_HERE';
+const apiKey = 'AIzaSyAkPS45eQkdmKrJkb-ExGOUDdxMzKhSGAY';
 
 function renderChatHistory() {
     const chatHistoryDiv = document.getElementById('chat-history');
