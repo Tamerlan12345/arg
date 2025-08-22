@@ -1,14 +1,8 @@
 {
-  "name": "ai-proxy-server",
+  "name": "netlify-ai-proxy",
   "version": "1.0.0",
-  "description": "Proxy server for Google Gemini API",
-  "main": "proxy-server.js",
-  "scripts": {
-    "start": "node proxy-server.js"
-  },
+  "description": "Netlify function to proxy Google Gemini API requests.",
   "dependencies": {
-    "express": "^4.19.2",
-    "node-fetch": "^2.7.0",
-    "cors": "^2.8.5"
+    "node-fetch": "^2.7.0"
   }
 }

@@ -225,7 +225,7 @@ async function handleSendMessage() {
             systemInstruction: { parts: [{ text: systemPrompt }] },
             generationConfig: { temperature: 0.7, topK: 1, topP: 1, maxOutputTokens: 4096 }
         };
-        const apiUrl = 'http://localhost:3000/api/generate'; // Point to the proxy server
+        const apiUrl = '/api/generate'; // Use relative path for Netlify function
         const response = await fetch(apiUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -234,7 +234,7 @@ async function handleSendMessage() {
 
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(`API Error: ${response.status} ${response.statusText}. ${errorData.error?.message || 'Unknown error'}`);
+            throw new Error(`API Error: ${response.status}. ${errorData.error?.message || 'Unknown error'}`);
         }
         const data = await response.json();
         const aiText = data.candidates[0].content.parts[0].text;
@@ -247,9 +247,9 @@ async function handleSendMessage() {
             conversationHistory.push({ role: 'assistant', text: aiText.trim() });
         }
     } catch (error) {
-        console.error('Error calling API via proxy:', error);
+        console.error('Error calling Netlify function:', error);
         conversationHistory.pop();
-        conversationHistory.push({ role: 'assistant', text: `К сожалению, произошла ошибка при обращении к ИИ-ассистенту. Убедитесь, что прокси-сервер запущен. Ошибка: ${error.message}` });
+        conversationHistory.push({ role: 'assistant', text: `К сожалению, произошла ошибка при обращении к ИИ-ассистенту. Проверьте настройки функции на Netlify и убедитесь, что переменная GEMINI_API_KEY установлена. Ошибка: ${error.message}` });
     } finally {
         renderChatHistory();
         sendBtn.disabled = false;
