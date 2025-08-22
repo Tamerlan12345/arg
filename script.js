@@ -97,11 +97,6 @@ function openTab(evt, tabName) {
 
 // --- ЛОГИКА ИИ-АССИСТЕНТА (НОВЫЙ ДИЗАЙН) ---
 let conversationHistory = [];
-// ВАЖНО: Ключ API не должен храниться в коде на стороне клиента.
-// Это серьезная уязвимость, которая позволяет любому украсть ваш ключ.
-// Замените эту строку и загружайте ключ из безопасного источника,
-// например, через серверный прокси или переменные окружения.
-const apiKey = 'AIzaSyAkPS45eQkdmKrJkb-ExGOUDdxMzKhSGAY';
 
 function renderChatHistory() {
     const chatHistoryDiv = document.getElementById('chat-history');
@@ -230,7 +225,7 @@ async function handleSendMessage() {
             systemInstruction: { parts: [{ text: systemPrompt }] },
             generationConfig: { temperature: 0.7, topK: 1, topP: 1, maxOutputTokens: 4096 }
         };
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+        const apiUrl = 'http://localhost:3000/api/generate'; // Point to the proxy server
         const response = await fetch(apiUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -239,7 +234,7 @@ async function handleSendMessage() {
 
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(`API Error: ${response.status} ${response.statusText}. ${errorData.error.message}`);
+            throw new Error(`API Error: ${response.status} ${response.statusText}. ${errorData.error?.message || 'Unknown error'}`);
         }
         const data = await response.json();
         const aiText = data.candidates[0].content.parts[0].text;
@@ -252,9 +247,9 @@ async function handleSendMessage() {
             conversationHistory.push({ role: 'assistant', text: aiText.trim() });
         }
     } catch (error) {
-        console.error('Error calling Gemini API:', error);
+        console.error('Error calling API via proxy:', error);
         conversationHistory.pop();
-        conversationHistory.push({ role: 'assistant', text: 'К сожалению, произошла ошибка при обращении к ИИ-ассистенту. Пожалуйста, проверьте свой ключ API и попробуйте снова позже.' });
+        conversationHistory.push({ role: 'assistant', text: `К сожалению, произошла ошибка при обращении к ИИ-ассистенту. Убедитесь, что прокси-сервер запущен. Ошибка: ${error.message}` });
     } finally {
         renderChatHistory();
         sendBtn.disabled = false;
