@@ -293,4 +293,72 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     renderChatHistory();
+
+    // --- ЛОГИКА ДЛЯ "Новый дизайн тест - ИИ" ---
+    const uploadBtn = document.getElementById('upload-btn');
+    const fileUpload = document.getElementById('file-upload');
+    const generateDocBtn = document.getElementById('generate-doc-btn');
+    const chatHistoryTest = document.getElementById('chat-history-test');
+
+    if (uploadBtn) {
+        uploadBtn.addEventListener('click', () => fileUpload.click());
+    }
+
+    if (fileUpload) {
+        fileUpload.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const fileName = file.name;
+            const fileExtension = fileName.split('.').pop().toLowerCase();
+            let fileType = '';
+
+            if (fileExtension === 'pdf') {
+                fileType = 'PDF';
+            } else if (fileExtension === 'doc' || fileExtension === 'docx') {
+                fileType = 'Word';
+            } else {
+                addMessageToTestChat('assistant', 'Пожалуйста, загрузите файл в формате PDF или Word.');
+                return;
+            }
+
+            addMessageToTestChat('user', `Загружен файл: ${fileName}`);
+            setTimeout(() => {
+                addMessageToTestChat('assistant', `Я проанализировал документ ${fileType}. Похоже, это договор. Чтобы сформировать дополнительное соглашение, мне нужен номер основного договора. Введите его, пожалуйста.`);
+                // In a real scenario, we would have an input field for the user to reply.
+                // For this simulation, we'll just show the generate button.
+                generateDocBtn.style.display = 'inline-block';
+                uploadBtn.style.display = 'none';
+            }, 1000);
+        });
+    }
+
+    if (generateDocBtn) {
+        generateDocBtn.addEventListener('click', () => {
+            addMessageToTestChat('assistant', 'Отлично! Готовлю документ для скачивания.');
+            setTimeout(() => {
+                const docContent = `ДОПОЛНИТЕЛЬНОЕ СОГЛАШЕНИЕ №1\n\nк Договору №[Номер договора, который ввел бы пользователь]\n\nг. Алматы, [Сегодняшняя дата]\n\nСтороны договорились о нижеследующем...`;
+                const blob = new Blob([docContent], { type: 'application/msword' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'Дополнительное_соглашение.doc';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                addMessageToTestChat('assistant', 'Документ успешно сформирован и скачан.');
+            }, 1500);
+        });
+    }
+
+    function addMessageToTestChat(role, text) {
+        if (!chatHistoryTest) return;
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `chat-message ${role}`;
+        const bubbleDiv = document.createElement('div');
+        bubbleDiv.className = 'chat-bubble';
+        bubbleDiv.textContent = text;
+        messageDiv.appendChild(bubbleDiv);
+        chatHistoryTest.appendChild(messageDiv);
+        chatHistoryTest.scrollTop = chatHistoryTest.scrollHeight;
+    }
 });

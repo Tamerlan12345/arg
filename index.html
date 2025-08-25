@@ -14,6 +14,7 @@
     <div class="tabs">
         <button class="tab-button active" onclick="openTab(event, 'old-design')">Старый дизайн</button>
         <button class="tab-button" onclick="openTab(event, 'new-design')">Новый дизайн</button>
+        <button class="tab-button" onclick="openTab(event, 'new-design-test')">Новый дизайн тест - ИИ</button>
     </div>
 
     <div id="old-design" class="tab-content active">
@@ -94,6 +95,43 @@
                     </div>
                     <div class="k-card-body">
                         <div id="final-document-output" class="k-result-area">
+                            <p class="k-placeholder">Здесь появится финальный текст документа после вашего подтверждения в чате...</p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div id="new-design-test" class="tab-content">
+        <div class="k-container">
+            <header class="k-header">
+                <h1>Новый дизайн тест - ИИ</h1>
+                <p>Загрузите файл PDF или WORD, чтобы ИИ определил структуру и необходимые поля для ввода.</p>
+            </header>
+            <main class="k-main">
+                <div class="k-card chat-card">
+                    <div class="k-card-body" id="chat-history-test">
+                        <!-- Chat messages will be dynamically inserted here -->
+                        <div class="chat-message assistant">
+                            <div class="chat-bubble">Здравствуйте! Я ваш юридический ИИ-консультант. Загрузите документ, и я помогу составить дополнительное соглашение.</div>
+                        </div>
+                    </div>
+                    <div class="k-card-footer">
+                        <div class="chat-input-form">
+                            <input type="file" id="file-upload" accept=".pdf,.doc,.docx" style="display: none;">
+                            <button type="button" class="k-button" id="upload-btn">Загрузить документ</button>
+                            <button type="button" class="k-button" id="generate-doc-btn" style="display: none;">Сформировать документ</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="k-card k-result-card">
+                     <div class="k-card-header">
+                        <h2>Итоговый документ</h2>
+                    </div>
+                    <div class="k-card-body">
+                        <div id="final-document-output-test" class="k-result-area">
                             <p class="k-placeholder">Здесь появится финальный текст документа после вашего подтверждения в чате...</p>
                         </div>
                     </div>
