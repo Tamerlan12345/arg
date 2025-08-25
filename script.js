@@ -401,39 +401,36 @@ document.addEventListener('DOMContentLoaded', () => {
         // In a real scenario, we would send `conversationHistoryTest` to the AI
         // and get a response. Here, we simulate the response based on keywords.
 
-        const systemPromptTest = `
-[РОЛЬ]
-Ты — высококвалифицированный юрист-методолог. Твоя задача — помочь пользователю составить юридически безупречное Дополнительное соглашение к договору страхования. Ты должен действовать проактивно, задавать уточняющие вопросы и генерировать текст в строгом деловом стиле, соблюдая все нормы и предоставленную структуру.
+        // This is a simulation of the backend call
+        // In a real scenario, we would send `conversationHistoryTest` to the AI
+        // and get a response. Here, we simulate the response based on keywords.
+
+        const systemPromptTest = `[РОЛЬ]
+Ты — высококвалифицированный юрист-методолог. Твоя задача — помочь пользователю составить юридически безупречное Дополнительное соглашение к договору страхования, используя предоставленный шаблон. Ты должен действовать проактивно, задавать уточняющие вопросы для сбора всей необходимой информации для заполнения ВСЕХ плейсхолдеров в шаблоне. Твоя конечная цель — вернуть полностью заполненный шаблон.
 
 [КОНТЕКСТ]
-Пользователь загрузил основной договор (файл) и написал текстовый запрос на изменение. Твоя задача — объединить информацию, запросить недостающие данные и сформировать полный текст Дополнительного соглашения.
+Пользователь загрузил основной договор (файл) и написал текстовый запрос на изменение. Твоя задача — вести диалог, чтобы собрать все данные, и затем заполнить шаблон.`;
 
----
-### ШАБЛОН И СТРУКТУРА ИТОГОВОГО ДОКУМЕНТА (ОБЯЗАТЕЛЬНО К СОБЛЮДЕНИЮ)
----
+        const documentTemplate = `**ДОПОЛНИТЕЛЬНОЕ СОГЛАШЕНИЕ № [AGREEMENT_NUMBER]**
+к Договору [INSURANCE_TYPE] № [CONTRACT_NUMBER] от [CONTRACT_DATE] г.
 
-**ДОПОЛНИТЕЛЬНОЕ СОГЛАШЕНИЕ № [Номер ДС, если не указан, спросить]**
-к Договору [Вид страхования, например, добровольного страхования автотранспорта] № [Номер основного договора] от [Дата основного договора] г.
+г. [CITY] | [CURRENT_DATE]
 
-г. [Город, если не указан, использовать "Алматы"] | «__» _______ 20__ г. [Текущая дата]
-
-**АО «Страховая Компания «Сентрас Иншуранс»** (Лицензия на право осуществления страховой (перестраховочной) деятельности по отрасли «Общее страхование» № 2.1.11 от 26.10.2022 г.), именуемое в дальнейшем «Страховщик», в лице [Должность подписанта Страховщика], действующего на основании [Основание полномочий], с одной стороны, и
-**[Полное наименование Страхователя]**, в лице [Должность подписанта Страхователя], действующего на основании [Основание полномочий], именуемый в дальнейшем «Страхователь», с другой стороны,
+**АО «Страховая Компания «Сентрас Иншуранс»** (Лицензия на право осуществления страховой (перестраховочной) деятельности по отрасли «Общее страхование» № 2.1.11 от 26.10.2022 г.), именуемое в дальнейшем «Страховщик», в лице [INSURER_SIGNATORY_DETAILS], с одной стороны, и
+**[POLICYHOLDER_NAME]**, в лице [POLICYHOLDER_SIGNATORY_DETAILS], именуемый в дальнейшем «Страхователь», с другой стороны,
 далее совместно именуемые «Стороны», а по отдельности «Сторона», пришли к соглашению о нижеследующем:
 
-1. [Пункт 1: Основание для заключения. Например: "Основанием для заключения является письмо Страхователя..."]
+1. Основанием для заключения настоящего Дополнительного соглашения является [REASON_FOR_AGREEMENT].
 
-2. [Пункт 2: Предмет соглашения. Например: "Внести изменения в Договор..."]
+2. Предметом настоящего Дополнительного соглашения является внесение изменений в Договор [INSURANCE_TYPE] № [CONTRACT_NUMBER] от [CONTRACT_DATE] г. (далее – Договор).
 
-3. [Пункт 3, 4, 5...: Детальное описание вносимых изменений, сгенерированное на основе запроса пользователя. Каждый логический блок - новый пункт.]
+3. [CHANGES_DESCRIPTION]
 
-[СЛЕДУЮЩИЕ ПУНКТЫ ДОЛЖНЫ ИМЕТЬ КОРРЕКТНУЮ ПОСЛЕДОВАТЕЛЬНУЮ НУМЕРАЦИЮ]
+4. Настоящее соглашение вступает в силу с момента подписания Сторонами и действительно в течение срока действия Договора.
 
-X. Настоящее соглашение вступает в силу с момента подписания Сторонами и действительно в течение срока действия Договора.
+5. Остальные пункты и условия Договора, не затронутые настоящим Дополнительным соглашением, остаются неизменными.
 
-Y. Остальные пункты и условия Договора, не затронутые настоящим Дополнительным соглашением, остаются неизменными.
-
-Z. Настоящее Дополнительное соглашение составлено в трёх подлинных экземплярах, имеющих одинаковую юридическую силу.
+6. Настоящее Дополнительное соглашение составлено в трёх подлинных экземплярах, имеющих одинаковую юридическую силу.
 
 **ПОДПИСИ СТОРОН:**
 
@@ -441,15 +438,15 @@ Z. Настоящее Дополнительное соглашение сост
 АО «СК «Сентрас Иншуранс»
 
 ______________________
-[ФИО подписанта Страховщика]
-[Должность]
+[INSURER_SIGNATORY_NAME]
+[INSURER_SIGNATORY_TITLE]
 
 **СТРАХОВАТЕЛЬ:**
-[Наименование Страхователя]
+[POLICYHOLDER_NAME_SHORT]
 
 ______________________
-[ФИО подписанта Страхователя]
-[Должность]
+[POLICYHOLDER_SIGNATORY_NAME]
+[POLICYHOLDER_SIGNATORY_TITLE]
 `;
 
         // SIMULATION LOGIC
@@ -462,14 +459,20 @@ ______________________
         } else if (!userProvidedInfo.insurerSignatory) {
             // This is the second message, with the answer about the signatory
             userProvidedInfo.insurerSignatory = userInput;
-            aiResponse = 'Отлично. Теперь введите, пожалуйста, полное наименование Страхователя и данные его подписанта (ФИО, должность, основание полномочий). Например: ИП "Балабеков", в лице Балабекова Айдара Буйтагалиевича, действующего на основании Устава.';
-        } else if (!userProvidedInfo.policyholder) {
-            // This is the third message, with the policyholder info
-            userProvidedInfo.policyholder = userInput;
+            aiResponse = 'Отлично. Теперь введите, пожалуйста, полное наименование Страхователя (например, ИП "Балабеков").';
+        } else if (!userProvidedInfo.policyholderName) {
+            userProvidedInfo.policyholderName = userInput;
+            aiResponse = 'Принято. Теперь введите данные подписанта со стороны страхователя (ФИО, должность).';
+        } else if (!userProvidedInfo.policyholderSignatory) {
+            userProvidedInfo.policyholderSignatory = userInput;
+            aiResponse = 'И последнее: укажите основание полномочий подписанта страхователя (например, "на основании Устава").';
+        } else if (!userProvidedInfo.policyholderAuthority) {
+            // This is the last piece of info needed
+            userProvidedInfo.policyholderAuthority = userInput;
 
             addMessageToTestChat('assistant', 'Все данные собраны. Генерирую итоговый документ...', conversationHistoryTest, chatHistoryTest);
 
-            const finalDoc = generateFinalDocument(systemPromptTest, userProvidedInfo);
+            const finalDoc = generateFinalDocument(documentTemplate, userProvidedInfo);
             finalDocOutputTest.textContent = finalDoc;
 
             chatForm.style.display = 'none';
@@ -485,30 +488,42 @@ ______________________
     }
 
     function generateFinalDocument(template, info) {
-        // This is a simplified generation based on the template. A real AI would do this more intelligently.
         let doc = template;
 
-        // Replace header fields
-        const insurerSignatory = info.insurerSignatory.toLowerCase() === 'да'
-            ? 'Директора Департамента страхования бизнеса Джалимбетова Нурлана Дюйсембековича, действующего на основании Доверенности № 426 от 17.07.2025г'
+        // --- Insurer Details ---
+        const insurerSignatoryDetails = info.insurerSignatory.toLowerCase() === 'да'
+            ? 'Директора Департамента страхования бизнеса Джалимбетова Нурлана Дюйсембековича, действующего на основании Доверенности № 426 от 17.07.2025г.'
             : info.insurerSignatory;
+        const insurerSignatoryName = insurerSignatoryDetails.includes('Джалимбетов') ? 'Джалимбетов Н.Д.' : '[Укажите ФИО]';
+        const insurerSignatoryTitle = insurerSignatoryDetails.includes('Джалимбетов') ? 'Директор Департамента страхования бизнеса' : '[Укажите Должность]';
 
-        doc = doc.replace('[Должность подписанта Страховщика], действующего на основании [Основание полномочий]', insurerSignatory);
-        doc = doc.replace('[Полное наименование Страхователя], в лице [Должность подписанта Страхователя], действующего на основании [Основание полномочий]', info.policyholder);
+        doc = doc.replace('[INSURER_SIGNATORY_DETAILS]', insurerSignatoryDetails);
+        doc = doc.replace('[INSURER_SIGNATORY_NAME]', insurerSignatoryName);
+        doc = doc.replace('[INSURER_SIGNATORY_TITLE]', insurerSignatoryTitle);
 
-        // Replace body (very simplified)
-        doc = doc.replace('[Пункт 3, 4, 5...: Детальное описание вносимых изменений, сгенерированное на основе запроса пользователя. Каждый логический блок - новый пункт.]', `3. Стороны договорились изложить следующий пункт Договора в новой редакции: "${info.userRequest}"`);
+        // --- Policyholder Details ---
+        const policyholderSignatoryParts = info.policyholderSignatory.split(',');
+        const policyholderSignatoryName = policyholderSignatoryParts[0]?.trim() || '[Укажите ФИО]';
+        const policyholderSignatoryTitle = policyholderSignatoryParts[1]?.trim() || '[Укажите Должность]';
+        const policyholderSignatoryFull = `${policyholderSignatoryName}, ${policyholderSignatoryTitle}`;
+        const policyholderDetails = `${info.policyholderName}, в лице ${policyholderSignatoryFull}, действующего на основании ${info.policyholderAuthority}`;
 
-        // Replace signatories
-        const insurerName = insurerSignatory.includes('Джалимбетов') ? 'Джалимбетов Н.Д.' : '[ФИО подписанта]';
-        const insurerTitle = insurerSignatory.includes('Джалимбетов') ? 'Директор Департамента' : '[Должность]';
-        doc = doc.replace('[ФИО подписанта Страховщика]', insurerName);
-        doc = doc.replace('[Должность]', insurerTitle);
+        doc = doc.replace('[POLICYHOLDER_NAME]', info.policyholderName);
+        doc = doc.replace('[POLICYHOLDER_SIGNATORY_DETAILS]', `${policyholderSignatoryFull}, действующего на основании ${info.policyholderAuthority}`);
+        doc = doc.replace('[POLICYHOLDER_NAME_SHORT]', info.policyholderName);
+        doc = doc.replace('[POLICYHOLDER_SIGNATORY_NAME]', policyholderSignatoryName);
+        doc = doc.replace('[POLICYHOLDER_SIGNATORY_TITLE]', policyholderSignatoryTitle);
 
-        const policyholderName = info.policyholder.split(',')[1]?.replace('в лице', '').trim() || '[ФИО подписанта]';
-        doc = doc.replace('[Наименование Страхователя]', info.policyholder.split(',')[0].trim());
-        doc = doc.replace('[ФИO подписанта Страхователя]', policyholderName);
-        doc = doc.replace('[Должность]', info.policyholder.split(',')[2]?.replace('действующего на основании', '').trim() || '[Должность]');
+        // --- Agreement Details ---
+        // These would be extracted from the uploaded doc or user input in a real scenario
+        doc = doc.replace(/\[AGREEMENT_NUMBER\]/g, '1');
+        doc = doc.replace(/\[INSURANCE_TYPE\]/g, 'добровольного страхования автомобильного транспорта');
+        doc = doc.replace(/\[CONTRACT_NUMBER\]/g, '[Номер договора]');
+        doc = doc.replace(/\[CONTRACT_DATE\]/g, '[Дата договора]');
+        doc = doc.replace(/\[CITY\]/g, 'г. Алматы');
+        doc = doc.replace(/\[CURRENT_DATE\]/g, new Date().toLocaleDateString('ru-RU'));
+        doc = doc.replace(/\[REASON_FOR_AGREEMENT\]/g, 'письма Страхователя');
+        doc = doc.replace(/\[CHANGES_DESCRIPTION\]/g, `Стороны договорились изложить следующий пункт Договора в новой редакции: "${info.userRequest}"`);
 
         return doc;
     }
