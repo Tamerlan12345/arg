@@ -295,10 +295,20 @@ document.addEventListener('DOMContentLoaded', () => {
     renderChatHistory();
 
     // --- ЛОГИКА ДЛЯ "Новый дизайн тест - ИИ" ---
+    const uploadForm = document.getElementById('upload-form-test');
+    const chatForm = document.getElementById('chat-form-test');
+    const generateForm = document.getElementById('generate-form-test');
+
     const uploadBtn = document.getElementById('upload-btn');
     const fileUpload = document.getElementById('file-upload');
+
+    const chatInput = document.getElementById('chat-input-test');
+    const sendChatBtn = document.getElementById('send-chat-btn-test');
+
     const generateDocBtn = document.getElementById('generate-doc-btn');
     const chatHistoryTest = document.getElementById('chat-history-test');
+
+    let userContractNumber = '';
 
     if (uploadBtn) {
         uploadBtn.addEventListener('click', () => fileUpload.click());
@@ -325,10 +335,26 @@ document.addEventListener('DOMContentLoaded', () => {
             addMessageToTestChat('user', `Загружен файл: ${fileName}`);
             setTimeout(() => {
                 addMessageToTestChat('assistant', `Я проанализировал документ ${fileType}. Похоже, это договор. Чтобы сформировать дополнительное соглашение, мне нужен номер основного договора. Введите его, пожалуйста.`);
-                // In a real scenario, we would have an input field for the user to reply.
-                // For this simulation, we'll just show the generate button.
-                generateDocBtn.style.display = 'inline-block';
-                uploadBtn.style.display = 'none';
+                uploadForm.style.display = 'none';
+                chatForm.style.display = 'flex';
+                chatInput.focus();
+            }, 1000);
+        });
+    }
+
+    if(sendChatBtn) {
+        sendChatBtn.addEventListener('click', () => {
+            const userInput = chatInput.value.trim();
+            if(!userInput) return;
+
+            userContractNumber = userInput;
+            addMessageToTestChat('user', `Номер договора: ${userInput}`);
+            chatInput.value = '';
+
+            setTimeout(() => {
+                addMessageToTestChat('assistant', `Спасибо! Номер договора "${userContractNumber}" принят. Теперь я могу сформировать документ.`);
+                chatForm.style.display = 'none';
+                generateForm.style.display = 'flex';
             }, 1000);
         });
     }
@@ -337,7 +363,9 @@ document.addEventListener('DOMContentLoaded', () => {
         generateDocBtn.addEventListener('click', () => {
             addMessageToTestChat('assistant', 'Отлично! Готовлю документ для скачивания.');
             setTimeout(() => {
-                const docContent = `ДОПОЛНИТЕЛЬНОЕ СОГЛАШЕНИЕ №1\n\nк Договору №[Номер договора, который ввел бы пользователь]\n\nг. Алматы, [Сегодняшняя дата]\n\nСтороны договорились о нижеследующем...`;
+                const today = new Date();
+                const formattedDate = `«${today.getDate()}» ${today.toLocaleString('ru-RU', { month: 'long' })} ${today.getFullYear()} г.`;
+                const docContent = `ДОПОЛНИТЕЛЬНОЕ СОГЛАШЕНИЕ №1\n\nк Договору №${userContractNumber || '[Номер не указан]'}\n\nг. Алматы, ${formattedDate}\n\nСтороны договорились о нижеследующем...`;
                 const blob = new Blob([docContent], { type: 'application/msword' });
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);

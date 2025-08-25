@@ -118,10 +118,16 @@
                         </div>
                     </div>
                     <div class="k-card-footer">
-                        <div class="chat-input-form">
+                        <div class="chat-input-form" id="upload-form-test">
                             <input type="file" id="file-upload" accept=".pdf,.doc,.docx" style="display: none;">
                             <button type="button" class="k-button" id="upload-btn">Загрузить документ</button>
-                            <button type="button" class="k-button" id="generate-doc-btn" style="display: none;">Сформировать документ</button>
+                        </div>
+                        <div class="chat-input-form" id="chat-form-test" style="display: none;">
+                            <textarea id="chat-input-test" class="k-textarea" placeholder="Введите номер договора..." rows="1"></textarea>
+                            <button type="button" class="k-button" id="send-chat-btn-test">Отправить</button>
+                        </div>
+                        <div class="chat-input-form" id="generate-form-test" style="display: none;">
+                             <button type="button" class="k-button" id="generate-doc-btn">Сформировать документ</button>
                         </div>
                     </div>
                 </div>
