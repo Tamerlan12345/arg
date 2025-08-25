@@ -237,6 +237,9 @@ async function handleSendMessage() {
 }
 
 // --- ОБЩИЙ ИНИЦИАЛИЗАТОР ---
+let conversationHistoryTest = [];
+let userProvidedInfo = {};
+
 document.addEventListener('DOMContentLoaded', () => {
     // --- ЛОГИКА ТАБОВ (REFACTORED) ---
     function openTab(evt, tabName) {
@@ -323,6 +326,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const generateDocBtn = document.getElementById('generate-doc-btn');
     const chatHistoryTest = document.getElementById('chat-history-test');
+    const finalDocOutputTest = document.getElementById('final-document-output-test');
 
     let userContractNumber = '';
 
@@ -394,15 +398,173 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function addMessageToTestChat(role, text) {
-        if (!chatHistoryTest) return;
+    function addMessageToTestChat(role, text, history, container) {
+        if (!container) return;
+
+        const message = { role, text };
+        if (history) {
+            history.push(message);
+        }
+
         const messageDiv = document.createElement('div');
         messageDiv.className = `chat-message ${role}`;
         const bubbleDiv = document.createElement('div');
         bubbleDiv.className = 'chat-bubble';
         bubbleDiv.textContent = text;
         messageDiv.appendChild(bubbleDiv);
-        chatHistoryTest.appendChild(messageDiv);
-        chatHistoryTest.scrollTop = chatHistoryTest.scrollHeight;
+        container.appendChild(messageDiv);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    // Initial message for test chat
+    if (chatHistoryTest) {
+        // Clear previous history on reload for cleaner testing
+        conversationHistoryTest = [];
+        addMessageToTestChat('assistant', 'Здравствуйте! Я ваш юридический ИИ-консультант. Загрузите документ, и я помогу составить дополнительное соглашение.', conversationHistoryTest, chatHistoryTest);
+    }
+
+    async function handleSendMessageTest() {
+        const userInput = chatInputTest.value.trim();
+        if (!userInput) return;
+
+        addMessageToTestChat('user', userInput, conversationHistoryTest, chatHistoryTest);
+        chatInputTest.value = '';
+        sendChatBtn.disabled = true;
+
+        // This is a simulation of the backend call
+        // In a real scenario, we would send `conversationHistoryTest` to the AI
+        // and get a response. Here, we simulate the response based on keywords.
+
+        const systemPromptTest = `
+[РОЛЬ]
+Ты — высококвалифицированный юрист-методолог. Твоя задача — помочь пользователю составить юридически безупречное Дополнительное соглашение к договору страхования. Ты должен действовать проактивно, задавать уточняющие вопросы и генерировать текст в строгом деловом стиле, соблюдая все нормы и предоставленную структуру.
+
+[КОНТЕКСТ]
+Пользователь загрузил основной договор (файл) и написал текстовый запрос на изменение. Твоя задача — объединить информацию, запросить недостающие данные и сформировать полный текст Дополнительного соглашения.
+
+---
+### ШАБЛОН И СТРУКТУРА ИТОГОВОГО ДОКУМЕНТА (ОБЯЗАТЕЛЬНО К СОБЛЮДЕНИЮ)
+---
+
+**ДОПОЛНИТЕЛЬНОЕ СОГЛАШЕНИЕ № [Номер ДС, если не указан, спросить]**
+к Договору [Вид страхования, например, добровольного страхования автотранспорта] № [Номер основного договора] от [Дата основного договора] г.
+
+г. [Город, если не указан, использовать "Алматы"] | «__» _______ 20__ г. [Текущая дата]
+
+**АО «Страховая Компания «Сентрас Иншуранс»** (Лицензия на право осуществления страховой (перестраховочной) деятельности по отрасли «Общее страхование» № 2.1.11 от 26.10.2022 г.), именуемое в дальнейшем «Страховщик», в лице [Должность подписанта Страховщика], действующего на основании [Основание полномочий], с одной стороны, и
+**[Полное наименование Страхователя]**, в лице [Должность подписанта Страхователя], действующего на основании [Основание полномочий], именуемый в дальнейшем «Страхователь», с другой стороны,
+далее совместно именуемые «Стороны», а по отдельности «Сторона», пришли к соглашению о нижеследующем:
+
+1. [Пункт 1: Основание для заключения. Например: "Основанием для заключения является письмо Страхователя..."]
+
+2. [Пункт 2: Предмет соглашения. Например: "Внести изменения в Договор..."]
+
+3. [Пункт 3, 4, 5...: Детальное описание вносимых изменений, сгенерированное на основе запроса пользователя. Каждый логический блок - новый пункт.]
+
+[СЛЕДУЮЩИЕ ПУНКТЫ ДОЛЖНЫ ИМЕТЬ КОРРЕКТНУЮ ПОСЛЕДОВАТЕЛЬНУЮ НУМЕРАЦИЮ]
+
+X. Настоящее соглашение вступает в силу с момента подписания Сторонами и действительно в течение срока действия Договора.
+
+Y. Остальные пункты и условия Договора, не затронутые настоящим Дополнительным соглашением, остаются неизменными.
+
+Z. Настоящее Дополнительное соглашение составлено в трёх подлинных экземплярах, имеющих одинаковую юридическую силу.
+
+**ПОДПИСИ СТОРОН:**
+
+**СТРАХОВЩИК:**
+АО «СК «Сентрас Иншуранс»
+
+______________________
+[ФИО подписанта Страховщика]
+[Должность]
+
+**СТРАХОВАТЕЛЬ:**
+[Наименование Страхователя]
+
+______________________
+[ФИО подписанта Страхователя]
+[Должность]
+`;
+
+        // SIMULATION LOGIC
+        let aiResponse = '';
+        const lowerUserInput = userInput.toLowerCase();
+
+        if (!userProvidedInfo.insurerSignatory) {
+            aiResponse = 'Спасибо. Подскажите, подписант со стороны Страховщика остается прежним (Джалимбетов Нурлан Дюйсембекович, Директор Департамента страхования бизнеса, по Доверенности № 426 от 17.07.2025г)? Ответьте "да" или введите новые данные (ФИО, должность, основание).';
+            userProvidedInfo.userRequest = userInput; // Save the initial request
+        } else if (!userProvidedInfo.policyholder) {
+             userProvidedInfo.insurerSignatory = userInput;
+             aiResponse = 'Отлично. Теперь введите, пожалуйста, полное наименование Страхователя и данные его подписанта (ФИО, должность, основание полномочий). Например: ИП "Балабеков", в лице Балабекова Айдара Буйтагалиевича, действующего на основании Устава.';
+        } else {
+            userProvidedInfo.policyholder = userInput;
+            // All info gathered, generate the document
+            addMessageToTestChat('assistant', 'Все данные собраны. Генерирую итоговый документ...', conversationHistoryTest, chatHistoryTest);
+
+            const finalDoc = generateFinalDocument(systemPromptTest, userProvidedInfo);
+            finalDocOutputTest.textContent = finalDoc;
+            generateForm.style.display = 'flex';
+            chatForm.style.display = 'none';
+            sendChatBtn.disabled = false;
+            return; // End of conversation
+        }
+
+        setTimeout(() => {
+            addMessageToTestChat('assistant', aiResponse, conversationHistoryTest, chatHistoryTest);
+            sendChatBtn.disabled = false;
+        }, 1200);
+    }
+
+    function generateFinalDocument(template, info) {
+        // This is a simplified generation based on the template. A real AI would do this more intelligently.
+        let doc = template;
+
+        // Replace header fields
+        const insurerSignatory = info.insurerSignatory.toLowerCase() === 'да'
+            ? 'Директора Департамента страхования бизнеса Джалимбетова Нурлана Дюйсембековича, действующего на основании Доверенности № 426 от 17.07.2025г'
+            : info.insurerSignatory;
+
+        doc = doc.replace('[Должность подписанта Страховщика], действующего на основании [Основание полномочий]', insurerSignatory);
+        doc = doc.replace('[Полное наименование Страхователя], в лице [Должность подписанта Страхователя], действующего на основании [Основание полномочий]', info.policyholder);
+
+        // Replace body (very simplified)
+        doc = doc.replace('[Пункт 3, 4, 5...: Детальное описание вносимых изменений, сгенерированное на основе запроса пользователя. Каждый логический блок - новый пункт.]', `3. Стороны договорились изложить следующий пункт Договора в новой редакции: "${info.userRequest}"`);
+
+        // Replace signatories
+        const insurerName = insurerSignatory.includes('Джалимбетов') ? 'Джалимбетов Н.Д.' : '[ФИО подписанта]';
+        const insurerTitle = insurerSignatory.includes('Джалимбетов') ? 'Директор Департамента' : '[Должность]';
+        doc = doc.replace('[ФИО подписанта Страховщика]', insurerName);
+        doc = doc.replace('[Должность]', insurerTitle);
+
+        const policyholderName = info.policyholder.split(',')[1]?.replace('в лице', '').trim() || '[ФИО подписанта]';
+        doc = doc.replace('[Наименование Страхователя]', info.policyholder.split(',')[0].trim());
+        doc = doc.replace('[ФИO подписанта Страхователя]', policyholderName);
+        doc = doc.replace('[Должность]', info.policyholder.split(',')[2]?.replace('действующего на основании', '').trim() || '[Должность]');
+
+        return doc;
+    }
+
+    if(sendChatBtn) {
+        sendChatBtn.addEventListener('click', handleSendMessageTest);
+        chatInputTest.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                handleSendMessageTest();
+            }
+        });
+    }
+
+    if (generateDocBtn) {
+        generateDocBtn.addEventListener('click', () => {
+            addMessageToTestChat('assistant', 'Документ для скачивания готов.', conversationHistoryTest, chatHistoryTest);
+            const docContent = finalDocOutputTest.textContent;
+            const blob = new Blob([docContent], { type: 'application/msword' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'Дополнительное_соглашение.doc';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
     }
 });
