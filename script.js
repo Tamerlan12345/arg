@@ -318,7 +318,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadBtn = document.getElementById('upload-btn');
     const fileUpload = document.getElementById('file-upload');
 
-    const chatInput = document.getElementById('chat-input-test');
+    const chatInputTest = document.getElementById('chat-input-test');
     const sendChatBtn = document.getElementById('send-chat-btn-test');
 
     const generateDocBtn = document.getElementById('generate-doc-btn');
@@ -353,19 +353,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 addMessageToTestChat('assistant', `Я проанализировал документ ${fileType}. Похоже, это договор. Чтобы сформировать дополнительное соглашение, мне нужен номер основного договора. Введите его, пожалуйста.`);
                 uploadForm.style.display = 'none';
                 chatForm.style.display = 'flex';
-                chatInput.focus();
+                chatInputTest.focus();
             }, 1000);
         });
     }
 
     if(sendChatBtn) {
         sendChatBtn.addEventListener('click', () => {
-            const userInput = chatInput.value.trim();
+            const userInput = chatInputTest.value.trim();
             if(!userInput) return;
 
             userContractNumber = userInput;
             addMessageToTestChat('user', `Номер договора: ${userInput}`);
-            chatInput.value = '';
+            chatInputTest.value = '';
 
             setTimeout(() => {
                 addMessageToTestChat('assistant', `Спасибо! Номер договора "${userContractNumber}" принят. Теперь я могу сформировать документ.`);
