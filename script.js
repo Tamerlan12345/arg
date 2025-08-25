@@ -339,62 +339,28 @@ document.addEventListener('DOMContentLoaded', () => {
             const file = event.target.files[0];
             if (!file) return;
 
+            // Reset state for a new conversation
+            userProvidedInfo = {};
+            finalDocOutputTest.textContent = '';
+            generateForm.style.display = 'none';
+
             const fileName = file.name;
-            const fileExtension = fileName.split('.').pop().toLowerCase();
-            let fileType = '';
+            addMessageToTestChat('assistant', `Документ "${fileName}" загружен. Теперь, пожалуйста, опишите в свободной форме, какие изменения необходимо внести.`, conversationHistoryTest, chatHistoryTest);
 
-            if (fileExtension === 'pdf') {
-                fileType = 'PDF';
-            } else if (fileExtension === 'doc' || fileExtension === 'docx') {
-                fileType = 'Word';
-            } else {
-                addMessageToTestChat('assistant', 'Пожалуйста, загрузите файл в формате PDF или Word.');
-                return;
-            }
-
-            addMessageToTestChat('user', `Загружен файл: ${fileName}`);
-            setTimeout(() => {
-                addMessageToTestChat('assistant', `Я проанализировал документ ${fileType}. Похоже, это договор. Чтобы сформировать дополнительное соглашение, мне нужен номер основного договора. Введите его, пожалуйста.`);
-                uploadForm.style.display = 'none';
-                chatForm.style.display = 'flex';
-                chatInputTest.focus();
-            }, 1000);
+            uploadForm.style.display = 'none';
+            chatForm.style.display = 'flex';
+            chatInputTest.focus();
         });
     }
 
+    // This is the new, correct event handler binding
     if(sendChatBtn) {
-        sendChatBtn.addEventListener('click', () => {
-            const userInput = chatInputTest.value.trim();
-            if(!userInput) return;
-
-            userContractNumber = userInput;
-            addMessageToTestChat('user', `Номер договора: ${userInput}`);
-            chatInputTest.value = '';
-
-            setTimeout(() => {
-                addMessageToTestChat('assistant', `Спасибо! Номер договора "${userContractNumber}" принят. Теперь я могу сформировать документ.`);
-                chatForm.style.display = 'none';
-                generateForm.style.display = 'flex';
-            }, 1000);
-        });
-    }
-
-    if (generateDocBtn) {
-        generateDocBtn.addEventListener('click', () => {
-            addMessageToTestChat('assistant', 'Отлично! Готовлю документ для скачивания.');
-            setTimeout(() => {
-                const today = new Date();
-                const formattedDate = `«${today.getDate()}» ${today.toLocaleString('ru-RU', { month: 'long' })} ${today.getFullYear()} г.`;
-                const docContent = `ДОПОЛНИТЕЛЬНОЕ СОГЛАШЕНИЕ №1\n\nк Договору №${userContractNumber || '[Номер не указан]'}\n\nг. Алматы, ${formattedDate}\n\nСтороны договорились о нижеследующем...`;
-                const blob = new Blob([docContent], { type: 'application/msword' });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = 'Дополнительное_соглашение.doc';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                addMessageToTestChat('assistant', 'Документ успешно сформирован и скачан.');
-            }, 1500);
+        sendChatBtn.addEventListener('click', handleSendMessageTest);
+        chatInputTest.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                handleSendMessageTest();
+            }
         });
     }
 
@@ -488,23 +454,26 @@ ______________________
 
         // SIMULATION LOGIC
         let aiResponse = '';
-        const lowerUserInput = userInput.toLowerCase();
 
-        if (!userProvidedInfo.insurerSignatory) {
-            aiResponse = 'Спасибо. Подскажите, подписант со стороны Страховщика остается прежним (Джалимбетов Нурлан Дюйсембекович, Директор Департамента страхования бизнеса, по Доверенности № 426 от 17.07.2025г)? Ответьте "да" или введите новые данные (ФИО, должность, основание).';
-            userProvidedInfo.userRequest = userInput; // Save the initial request
+        if (!userProvidedInfo.userRequest) {
+            // This is the first message containing the user's main request
+            userProvidedInfo.userRequest = userInput;
+            aiResponse = 'Спасибо, ваш запрос принят. Теперь давайте уточним детали. Подписант со стороны Страховщика остается прежним (Джалимбетов Нурлан Дюйсембекович, Директор Департамента страхования бизнеса, по Доверенности № 426 от 17.07.2025г)? Ответьте "да" или введите новые данные (ФИО, должность, основание).';
+        } else if (!userProvidedInfo.insurerSignatory) {
+            // This is the second message, with the answer about the signatory
+            userProvidedInfo.insurerSignatory = userInput;
+            aiResponse = 'Отлично. Теперь введите, пожалуйста, полное наименование Страхователя и данные его подписанта (ФИО, должность, основание полномочий). Например: ИП "Балабеков", в лице Балабекова Айдара Буйтагалиевича, действующего на основании Устава.';
         } else if (!userProvidedInfo.policyholder) {
-             userProvidedInfo.insurerSignatory = userInput;
-             aiResponse = 'Отлично. Теперь введите, пожалуйста, полное наименование Страхователя и данные его подписанта (ФИО, должность, основание полномочий). Например: ИП "Балабеков", в лице Балабекова Айдара Буйтагалиевича, действующего на основании Устава.';
-        } else {
+            // This is the third message, with the policyholder info
             userProvidedInfo.policyholder = userInput;
-            // All info gathered, generate the document
+
             addMessageToTestChat('assistant', 'Все данные собраны. Генерирую итоговый документ...', conversationHistoryTest, chatHistoryTest);
 
             const finalDoc = generateFinalDocument(systemPromptTest, userProvidedInfo);
             finalDocOutputTest.textContent = finalDoc;
-            generateForm.style.display = 'flex';
+
             chatForm.style.display = 'none';
+            generateForm.style.display = 'flex';
             sendChatBtn.disabled = false;
             return; // End of conversation
         }
