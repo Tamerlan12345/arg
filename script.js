@@ -352,30 +352,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const fileName = file.name;
             addMessageToTestChat('user', `Загружен файл: ${fileName}`, conversationHistoryTest, chatHistoryTest);
 
-            // Simulate checking the document
+            // Simulate checking the document for entity type
             setTimeout(() => {
-                const signatoryFound = Math.random() > 0.5; // 50% chance to "find" a signatory
-                if (signatoryFound) {
-                    userProvidedInfo.simulatedSignatory = "Иванова Ивана Ивановича, действующего на основании Приказа №123";
-                    addMessageToTestChat('assistant', `Документ проанализирован. Я вижу, что со стороны Страховщика указан подписант: ${userProvidedInfo.simulatedSignatory}. Это корректные данные? Ответьте "да" или введите новые.`, conversationHistoryTest, chatHistoryTest);
-                } else {
-                    addMessageToTestChat('assistant', `Документ проанализирован. Подписант со стороны Страховщика не найден. Пожалуйста, введите его данные (ФИО, должность, основание полномочий).`, conversationHistoryTest, chatHistoryTest);
-                }
+                const entityTypes = ['юридическое лицо (ТОО)', 'ИП', 'физическое лицо'];
+                const detectedEntityType = entityTypes[Math.floor(Math.random() * entityTypes.length)];
+                userProvidedInfo.detectedEntityType = detectedEntityType;
+
+                addMessageToTestChat('assistant', `Проанализировав документ, я определил, что Страхователь является как '${detectedEntityType}'. Это верно? (да/нет)`, conversationHistoryTest, chatHistoryTest);
+
                 uploadForm.style.display = 'none';
                 chatForm.style.display = 'flex';
                 chatInputTest.focus();
             }, 1500);
-        });
-    }
-
-    // This is the new, correct event handler binding
-    if(sendChatBtn) {
-        sendChatBtn.addEventListener('click', handleSendMessageTest);
-        chatInputTest.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                handleSendMessageTest();
-            }
         });
     }
 
@@ -397,11 +385,128 @@ document.addEventListener('DOMContentLoaded', () => {
         container.scrollTop = container.scrollHeight;
     }
 
+    async function handleSendMessageTest() {
+        const userInput = chatInputTest.value.trim();
+        if (!userInput) return;
+
+        addMessageToTestChat('user', userInput, conversationHistoryTest, chatHistoryTest);
+        chatInputTest.value = '';
+        sendChatBtn.disabled = true;
+
+        const systemPromptTest = `[РОЛЬ]
+Ты — элитный юрист-аналитик и методолог.
+
+[ГЛАВНАЯ ЗАДАЧА]
+Твоя задача — провести пользователя через процесс создания Дополнительного соглашения, выступая в роли эксперта. Ты должен анализировать предоставленную информацию, задавать правильные вопросы и трансформировать запросы пользователя в юридически безупречные формулировки.
+
+[АЛГОРИТМ ДЕЙСТВИЙ]
+1.  **АНАЛИЗ ДОКУМЕНТА:** После загрузки файла, ты должен определить тип контрагента (физическое лицо, ИП, юридическое лицо) и сообщить об этом пользователю для подтверждения.
+2.  **АДАПТИВНЫЙ СБОР ДАННЫХ:** В зависимости от подтвержденного типа контрагента, твой диалог должен меняться.
+    *   Для **юр. лиц и ИП** ты должен запросить полные данные подписанта (ФИО, должность, основание полномочий).
+    *   Для **физ. лиц** ты запрашиваешь только ФИО, так как они действуют от своего имени.
+3.  **ТРАНСФОРМАЦИЯ ЗАПРОСА:** Когда пользователь пишет, что он хочет изменить (например, "хочу поменять график платежей"), твоя задача — не просто принять это, а **трансформировать** в юридически корректный текст.
+    *   **Пример:** Пользователь пишет "увеличить премию на 50к". Ты должен ответить: "Ваш запрос принят. Он будет изложен в следующей редакции: 'Стороны пришли к соглашению увеличить размер страховой премии на 50 000 (пятьдесят тысяч) тенге.'".
+    *   Ты должен симулировать исправление орфографии и расшифровку сокращений ("Упр.дир." -> "Управляющий директор").
+4.  **ФИНАЛИЗАЦИЯ:** После сбора всех данных, ты формируешь итоговый документ, строго следуя шаблону.`;
+
+        const documentTemplate = document.getElementById('document-template-text').textContent;
+        let aiResponse = '';
+
+        // This is the new, granular, adaptive conversation flow
+        if (!userProvidedInfo.entityTypeConfirmed) {
+            userProvidedInfo.entityType = userInput.toLowerCase() === 'да' ? userProvidedInfo.detectedEntityType : userInput;
+            userProvidedInfo.entityTypeConfirmed = true;
+            aiResponse = `Тип контрагента подтвержден как '${userProvidedInfo.entityType}'.\n\nТеперь введите ФИО подписанта со стороны Страховщика.`;
+        } else if (!userProvidedInfo.insurerSignatoryName) {
+            userProvidedInfo.insurerSignatoryName = userInput;
+            aiResponse = 'Принято. Теперь введите должность подписанта со стороны Страховщика.';
+        } else if (!userProvidedInfo.insurerSignatoryTitle) {
+            userProvidedInfo.insurerSignatoryTitle = userInput;
+            aiResponse = 'Отлично. Теперь введите основание полномочий подписанта Страховщика (например, "на основании Устава").';
+        } else if (!userProvidedInfo.insurerAuthority) {
+            userProvidedInfo.insurerAuthority = userInput;
+            aiResponse = 'Данные по Страховщику приняты. Теперь, пожалуйста, опишите, какие именно изменения вы хотите внести в договор.';
+        } else if (!userProvidedInfo.userRequest) {
+            userProvidedInfo.userRequest = userInput;
+            const correctedText = simulateCorrection(userInput);
+            userProvidedInfo.correctedRequest = correctedText;
+            aiResponse = `Ваш запрос принят и скорректирован. Итоговая формулировка будет: "${correctedText}".\n\nТеперь перейдем к данным Страхователя. Введите его полное наименование (например, ТОО "Рога и Копыта" или "Иванов Иван Иванович").`;
+        } else if (!userProvidedInfo.policyholderName) {
+            userProvidedInfo.policyholderName = userInput;
+            if (userProvidedInfo.entityType.includes('физ')) {
+                 // Skip signatory details for natural persons
+                userProvidedInfo.policyholderSignatoryName = userInput; // Name is the same as the entity name
+                userProvidedInfo.policyholderSignatoryTitle = 'физическое лицо';
+                userProvidedInfo.policyholderAuthority = 'действующий от своего имени';
+                 addMessageToTestChat('assistant', 'Все данные собраны. Генерирую итоговый документ...', conversationHistoryTest, chatHistoryTest);
+                const finalDoc = generateFinalDocument(documentTemplate, userProvidedInfo);
+                finalDocOutputTest.textContent = finalDoc;
+                chatForm.style.display = 'none';
+                generateForm.style.display = 'flex';
+                sendChatBtn.disabled = false;
+                return;
+            } else {
+                aiResponse = 'Принято. Теперь введите ФИО подписанта со стороны Страхователя.';
+            }
+        } else if (!userProvidedInfo.policyholderSignatoryName) {
+            userProvidedInfo.policyholderSignatoryName = userInput;
+            aiResponse = 'Принято. Теперь введите должность подписанта Страхователя.';
+        } else if (!userProvidedInfo.policyholderSignatoryTitle) {
+            userProvidedInfo.policyholderSignatoryTitle = userInput;
+            aiResponse = 'И последнее: укажите основание полномочий подписанта Страхователя (например, "на основании Устава").';
+        } else if (!userProvidedInfo.policyholderAuthority) {
+            userProvidedInfo.policyholderAuthority = userInput;
+            addMessageToTestChat('assistant', 'Все данные собраны. Генерирую итоговый документ...', conversationHistoryTest, chatHistoryTest);
+            const finalDoc = generateFinalDocument(documentTemplate, userProvidedInfo);
+            finalDocOutputTest.textContent = finalDoc;
+            chatForm.style.display = 'none';
+            generateForm.style.display = 'flex';
+            sendChatBtn.disabled = false;
+            return; // End of conversation
+        }
+
+        setTimeout(() => {
+            addMessageToTestChat('assistant', aiResponse, conversationHistoryTest, chatHistoryTest);
+            sendChatBtn.disabled = false;
+            chatInputTest.focus();
+        }, 1200);
+    }
+
+    // This is the new, correct event handler binding
+    if(sendChatBtn) {
+        sendChatBtn.addEventListener('click', handleSendMessageTest);
+        chatInputTest.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                handleSendMessageTest();
+            }
+        });
+    }
+
     // Initial message for test chat
     if (chatHistoryTest) {
         // Clear previous history on reload for cleaner testing
         conversationHistoryTest = [];
         addMessageToTestChat('assistant', 'Здравствуйте! Я ваш юридический ИИ-консультант. Загрузите документ, и я помогу составить дополнительное соглашение.', conversationHistoryTest, chatHistoryTest);
+    }
+
+    function simulateCorrection(text) {
+        const abbreviations = {
+            "упр дир": "Управляющий директор",
+            "ген дир": "Генеральный директор",
+            "фин дир": "Финансовый директор",
+            "дир": "Директор",
+            "ТОО": "Товарищество с ограниченной ответственностью",
+            "АО": "Акционерное общество",
+        };
+
+        let correctedText = text;
+        for (const key in abbreviations) {
+            const regex = new RegExp(`\\b${key}\\b`, 'gi');
+            correctedText = correctedText.replace(regex, abbreviations[key]);
+        }
+
+        return `Стороны договорились изложить пункт Договора, касающийся изменений, в следующей редакции: "${correctedText}"`;
     }
 
     async function handleSendMessageTest() {
@@ -412,18 +517,20 @@ document.addEventListener('DOMContentLoaded', () => {
         chatInputTest.value = '';
         sendChatBtn.disabled = true;
 
-        const systemPromptTest = `[... a lot of text ...]`; // The prompt is not being changed here
-        const documentTemplate = `[... a lot of text ...]`; // The template is not being changed here
-
-        // SIMULATION LOGIC
+        const documentTemplate = document.getElementById('document-template-text').textContent;
         let aiResponse = '';
 
-        if (!userProvidedInfo.insurerSignatoryName) {
+        // This is the new, granular, adaptive conversation flow
+        if (!userProvidedInfo.entityTypeConfirmed) {
+            userProvidedInfo.entityType = userInput.toLowerCase() === 'да' ? userProvidedInfo.detectedEntityType : userInput;
+            userProvidedInfo.entityTypeConfirmed = true;
+            aiResponse = `Тип контрагента подтвержден как '${userProvidedInfo.entityType}'.\n\nТеперь введите ФИО подписанта со стороны Страховщика.`;
+        } else if (!userProvidedInfo.insurerSignatoryName) {
             userProvidedInfo.insurerSignatoryName = userInput;
             aiResponse = 'Принято. Теперь введите должность подписанта со стороны Страховщика.';
         } else if (!userProvidedInfo.insurerSignatoryTitle) {
             userProvidedInfo.insurerSignatoryTitle = userInput;
-            aiResponse = 'Отлично. Теперь введите основание полномочий подписанта Страховщика (например, "на основании Устава" или "по доверенности №123").';
+            aiResponse = 'Отлично. Теперь введите основание полномочий подписанта Страховщика (например, "на основании Устава").';
         } else if (!userProvidedInfo.insurerAuthority) {
             userProvidedInfo.insurerAuthority = userInput;
             aiResponse = 'Данные по Страховщику приняты. Теперь, пожалуйста, опишите, какие именно изменения вы хотите внести в договор.';
@@ -431,10 +538,24 @@ document.addEventListener('DOMContentLoaded', () => {
             userProvidedInfo.userRequest = userInput;
             const correctedText = simulateCorrection(userInput);
             userProvidedInfo.correctedRequest = correctedText;
-            aiResponse = `Ваш запрос принят и скорректирован. Итоговая формулировка будет: "${correctedText}".\n\nТеперь введите полное наименование Страхователя (например, ТОО "Рога и Копыта").`;
+            aiResponse = `Ваш запрос принят и скорректирован. Итоговая формулировка будет: "${correctedText}".\n\nТеперь перейдем к данным Страхователя. Введите его полное наименование (например, ТОО "Рога и Копыта" или "Иванов Иван Иванович").`;
         } else if (!userProvidedInfo.policyholderName) {
             userProvidedInfo.policyholderName = userInput;
-            aiResponse = 'Принято. Теперь введите ФИО подписанта со стороны Страхователя.';
+            if (userProvidedInfo.entityType.includes('физ')) {
+                 // Skip signatory details for natural persons
+                userProvidedInfo.policyholderSignatoryName = userInput; // Name is the same as the entity name
+                userProvidedInfo.policyholderSignatoryTitle = 'физическое лицо';
+                userProvidedInfo.policyholderAuthority = 'действующий от своего имени';
+                addMessageToTestChat('assistant', 'Все данные собраны. Генерирую итоговый документ...', conversationHistoryTest, chatHistoryTest);
+                const finalDoc = generateFinalDocument(documentTemplate, userProvidedInfo);
+                finalDocOutputTest.textContent = finalDoc;
+                chatForm.style.display = 'none';
+                generateForm.style.display = 'flex';
+                sendChatBtn.disabled = false;
+                return;
+            } else {
+                aiResponse = 'Принято. Теперь введите ФИО подписанта со стороны Страхователя.';
+            }
         } else if (!userProvidedInfo.policyholderSignatoryName) {
             userProvidedInfo.policyholderSignatoryName = userInput;
             aiResponse = 'Принято. Теперь введите должность подписанта Страхователя.';
@@ -443,12 +564,9 @@ document.addEventListener('DOMContentLoaded', () => {
             aiResponse = 'И последнее: укажите основание полномочий подписанта Страхователя (например, "на основании Устава").';
         } else if (!userProvidedInfo.policyholderAuthority) {
             userProvidedInfo.policyholderAuthority = userInput;
-
             addMessageToTestChat('assistant', 'Все данные собраны. Генерирую итоговый документ...', conversationHistoryTest, chatHistoryTest);
-
             const finalDoc = generateFinalDocument(documentTemplate, userProvidedInfo);
             finalDocOutputTest.textContent = finalDoc;
-
             chatForm.style.display = 'none';
             generateForm.style.display = 'flex';
             sendChatBtn.disabled = false;
