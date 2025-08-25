@@ -73,28 +73,6 @@ function generateText() {
     document.getElementById('result-text').value = textParts.join('\n\n');
 }
 
-// --- ЛОГИКА ТАБОВ ---
-function openTab(evt, tabName) {
-    var i, tabcontent, tablinks;
-    tabcontent = document.getElementsByClassName("tab-content");
-    for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
-    }
-    tablinks = document.getElementsByClassName("tab-button");
-    for (i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" active", "");
-    }
-    document.getElementById(tabName).style.display = "block";
-    if(evt.currentTarget) {
-        evt.currentTarget.className += " active";
-    }
-    if (tabName === 'new-design') {
-        document.body.classList.add('new-design-body');
-    } else {
-        document.body.classList.remove('new-design-body');
-    }
-}
-
 // --- ЛОГИКА ИИ-АССИСТЕНТА (НОВЫЙ ДИЗАЙН) ---
 let conversationHistory = [];
 
@@ -260,8 +238,46 @@ async function handleSendMessage() {
 
 // --- ОБЩИЙ ИНИЦИАЛИЗАТОР ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Инициализация старого дизайна
-    document.getElementById('old-design').style.display = 'block';
+    // --- ЛОГИКА ТАБОВ (REFACTORED) ---
+    function openTab(evt, tabName) {
+        let i, tabcontent, tablinks;
+
+        tabcontent = document.getElementsByClassName("tab-content");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+
+        tablinks = document.getElementsByClassName("tab-button");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+
+        const currentTab = document.getElementById(tabName);
+        if (currentTab) {
+            currentTab.style.display = "block";
+        }
+
+        if (evt.currentTarget) {
+            evt.currentTarget.className += " active";
+        }
+
+        // Add class to body for special styling
+        if (tabName === 'new-design' || tabName === 'new-design-test') {
+            document.body.classList.add('new-design-body');
+        } else {
+            document.body.classList.remove('new-design-body');
+        }
+    }
+
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.addEventListener('click', (event) => {
+            const tabName = event.currentTarget.getAttribute('data-tab');
+            openTab(event, tabName);
+        });
+    });
+
+    // --- Инициализация старого дизайна ---
+    document.getElementById('old-design').style.display = 'block'; // Keep old design active by default
     document.querySelectorAll('.number-input').forEach(input => input.addEventListener('input', numberInputHandler));
     document.querySelectorAll('input[name="change-mode"]').forEach(r=>r.addEventListener('change',e=>{document.getElementById('monetary-changes-wrapper').classList.toggle('visible',e.target.value==='monetary');document.getElementById('info-changes-wrapper').classList.toggle('visible',e.target.value==='info');}));
     document.querySelectorAll('input[name="info-change-type"]').forEach(r=>r.addEventListener('change',e=>{document.getElementById('info-general-details').classList.toggle('visible',e.target.value==='general');document.getElementById('info-insured-details').classList.toggle('visible',e.target.value==='insured');}));
