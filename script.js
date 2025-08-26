@@ -509,98 +509,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return `Стороны договорились изложить пункт Договора, касающийся изменений, в следующей редакции: "${correctedText}"`;
     }
 
-    async function handleSendMessageTest() {
-        const userInput = chatInputTest.value.trim();
-        if (!userInput) return;
-
-        addMessageToTestChat('user', userInput, conversationHistoryTest, chatHistoryTest);
-        chatInputTest.value = '';
-        sendChatBtn.disabled = true;
-
-        const documentTemplate = document.getElementById('document-template-text').textContent;
-        let aiResponse = '';
-
-        // This is the new, granular, adaptive conversation flow
-        if (!userProvidedInfo.entityTypeConfirmed) {
-            userProvidedInfo.entityType = userInput.toLowerCase() === 'да' ? userProvidedInfo.detectedEntityType : userInput;
-            userProvidedInfo.entityTypeConfirmed = true;
-            aiResponse = `Тип контрагента подтвержден как '${userProvidedInfo.entityType}'.\n\nТеперь введите ФИО подписанта со стороны Страховщика.`;
-        } else if (!userProvidedInfo.insurerSignatoryName) {
-            userProvidedInfo.insurerSignatoryName = userInput;
-            aiResponse = 'Принято. Теперь введите должность подписанта со стороны Страховщика.';
-        } else if (!userProvidedInfo.insurerSignatoryTitle) {
-            userProvidedInfo.insurerSignatoryTitle = userInput;
-            aiResponse = 'Отлично. Теперь введите основание полномочий подписанта Страховщика (например, "на основании Устава").';
-        } else if (!userProvidedInfo.insurerAuthority) {
-            userProvidedInfo.insurerAuthority = userInput;
-            aiResponse = 'Данные по Страховщику приняты. Теперь, пожалуйста, опишите, какие именно изменения вы хотите внести в договор.';
-        } else if (!userProvidedInfo.userRequest) {
-            userProvidedInfo.userRequest = userInput;
-            const correctedText = simulateCorrection(userInput);
-            userProvidedInfo.correctedRequest = correctedText;
-            aiResponse = `Ваш запрос принят и скорректирован. Итоговая формулировка будет: "${correctedText}".\n\nТеперь перейдем к данным Страхователя. Введите его полное наименование (например, ТОО "Рога и Копыта" или "Иванов Иван Иванович").`;
-        } else if (!userProvidedInfo.policyholderName) {
-            userProvidedInfo.policyholderName = userInput;
-            if (userProvidedInfo.entityType.includes('физ')) {
-                 // Skip signatory details for natural persons
-                userProvidedInfo.policyholderSignatoryName = userInput; // Name is the same as the entity name
-                userProvidedInfo.policyholderSignatoryTitle = 'физическое лицо';
-                userProvidedInfo.policyholderAuthority = 'действующий от своего имени';
-                addMessageToTestChat('assistant', 'Все данные собраны. Генерирую итоговый документ...', conversationHistoryTest, chatHistoryTest);
-                const finalDoc = generateFinalDocument(documentTemplate, userProvidedInfo);
-                finalDocOutputTest.textContent = finalDoc;
-                chatForm.style.display = 'none';
-                generateForm.style.display = 'flex';
-                sendChatBtn.disabled = false;
-                return;
-            } else {
-                aiResponse = 'Принято. Теперь введите ФИО подписанта со стороны Страхователя.';
-            }
-        } else if (!userProvidedInfo.policyholderSignatoryName) {
-            userProvidedInfo.policyholderSignatoryName = userInput;
-            aiResponse = 'Принято. Теперь введите должность подписанта Страхователя.';
-        } else if (!userProvidedInfo.policyholderSignatoryTitle) {
-            userProvidedInfo.policyholderSignatoryTitle = userInput;
-            aiResponse = 'И последнее: укажите основание полномочий подписанта Страхователя (например, "на основании Устава").';
-        } else if (!userProvidedInfo.policyholderAuthority) {
-            userProvidedInfo.policyholderAuthority = userInput;
-            addMessageToTestChat('assistant', 'Все данные собраны. Генерирую итоговый документ...', conversationHistoryTest, chatHistoryTest);
-            const finalDoc = generateFinalDocument(documentTemplate, userProvidedInfo);
-            finalDocOutputTest.textContent = finalDoc;
-            chatForm.style.display = 'none';
-            generateForm.style.display = 'flex';
-            sendChatBtn.disabled = false;
-            return; // End of conversation
-        }
-
-        setTimeout(() => {
-            addMessageToTestChat('assistant', aiResponse, conversationHistoryTest, chatHistoryTest);
-            sendChatBtn.disabled = false;
-            chatInputTest.focus();
-        }, 1200);
-    }
-
-    function simulateCorrection(text) {
-        const abbreviations = {
-            "упр дир": "Управляющий директор",
-            "ген дир": "Генеральный директор",
-            "фин дир": "Финансовый директор",
-            "дир": "Директор",
-            "ТОО": "Товарищество с ограниченной ответственностью",
-            "АО": "Акционерное общество",
-        };
-
-        let correctedText = text;
-        for (const key in abbreviations) {
-            // Use a regex for case-insensitive, whole-word replacement
-            const regex = new RegExp(`\\b${key}\\b`, 'gi');
-            correctedText = correctedText.replace(regex, abbreviations[key]);
-        }
-
-        // Wrap in a formal sentence
-        return `Стороны договорились изложить пункт Договора, касающийся изменений, в следующей редакции: "${correctedText}"`;
-    }
-
     function generateFinalDocument(template, info) {
         let doc = template;
 
@@ -633,16 +541,6 @@ document.addEventListener('DOMContentLoaded', () => {
         doc = doc.replace(/\[REASON_FOR_AGREEMENT\]/g, 'письма Страхователя');
 
         return doc;
-    }
-
-    if(sendChatBtn) {
-        sendChatBtn.addEventListener('click', handleSendMessageTest);
-        chatInputTest.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                handleSendMessageTest();
-            }
-        });
     }
 
     if (generateDocBtn) {
